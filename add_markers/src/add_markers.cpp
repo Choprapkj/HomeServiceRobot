@@ -52,7 +52,7 @@ int main( int argc, char** argv )
   {
     visualization_msgs::Marker marker;
     // Set the frame ID and timestamp.  See the TF tutorials for information on these.
-    marker.header.frame_id = "/my_frame";
+    marker.header.frame_id = "map";
     marker.header.stamp = ros::Time::now();
 // %EndTag(MARKER_INIT)%
 
@@ -117,24 +117,6 @@ int main( int argc, char** argv )
     marker_pub.publish(marker);
 // %EndTag(PUBLISH)%
 
-    // Cycle between different shapes
-// %Tag(CYCLE_SHAPES)%
-    switch (shape)
-    {
-    case visualization_msgs::Marker::CUBE:
-      shape = visualization_msgs::Marker::SPHERE;
-      break;
-    case visualization_msgs::Marker::SPHERE:
-      shape = visualization_msgs::Marker::ARROW;
-      break;
-    case visualization_msgs::Marker::ARROW:
-      shape = visualization_msgs::Marker::CYLINDER;
-      break;
-    case visualization_msgs::Marker::CYLINDER:
-      shape = visualization_msgs::Marker::CUBE;
-      break;
-    }
-// %EndTag(CYCLE_SHAPES)%
 
 // %Tag(SLEEP_END)%
     r.sleep();
