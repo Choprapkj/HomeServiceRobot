@@ -65,9 +65,9 @@ visualization_msgs::Marker setMarkerProperties(const uint32_t shape){
   marker.scale.y = 0.25;
   marker.scale.z = 0.25;
   // Set the color -- be sure to set alpha to something non-zero!
-  marker.color.r = 0.0f;
+  marker.color.r = 1.0f;
   marker.color.g = 1.0f;
-  marker.color.b = 0.0f;
+  marker.color.b = 1.0f;
   marker.color.a = 1.0;
   marker.lifetime = ros::Duration();
   return marker;
@@ -75,8 +75,8 @@ visualization_msgs::Marker setMarkerProperties(const uint32_t shape){
 
 void odom_sub_callback(const nav_msgs::Odometry::ConstPtr& message)
 {
-  odom.x = message->pose.pose.position.y;
-  odom.y = message->pose.pose.position.x;
+  odom.x = message->pose.pose.position.x;
+  odom.y = message->pose.pose.position.y;
 }
   
 int main( int argc, char** argv )
@@ -86,7 +86,7 @@ int main( int argc, char** argv )
   pickup.y = 4.0;
   dropoff.x = -1.0;
   dropoff.y = -3.0;
-  float pos_err_threshold = 0.2;
+  float pos_err_threshold = 0.4;
   bool goal_reached = false;
   ros::init(argc, argv, "add_markers");
   ros::NodeHandle n;
@@ -115,24 +115,26 @@ int main( int argc, char** argv )
   }
   marker_pub.publish(marker);
 
-  // PC work
   //Check if robot reached goal
   while(!goal_reached)
   {
-    if(sqrt(pow(odom.x-pickup.x,2) + pow(odom.y-pickup.y,2)) < pos_err_threshold);
+    ros::spinOnce();
+    float dist = sqrt(pow(odom.x-pickup.x,2) + pow(odom.y-pickup.y,2));
+    if(dist < pos_err_threshold)
        goal_reached = true;
   }
- 
+
   marker.action = visualization_msgs::Marker::DELETE;
   marker_pub.publish(marker);
   
   goal_reached = false;
   while(!goal_reached)
   {
-    if(sqrt(pow(odom.x-dropoff.x,2) + pow(odom.y-dropoff.y,2)) < pos_err_threshold);
+    ros::spinOnce();
+    if((sqrt(pow(odom.x-dropoff.x,2) + pow(odom.y-dropoff.y,2))) < pos_err_threshold)
        goal_reached = true;
   }
-  marker.pose.position.x = -1;
+
   marker.action = visualization_msgs::Marker::ADD;
   marker.pose.position.x = dropoff.x;
   marker.pose.position.y = dropoff.y;
