@@ -24,8 +24,9 @@ int main(int argc, char** argv){
   goal.target_pose.header.stamp = ros::Time::now();
 
   // Define a position and orientation for the robot to reach
-  goal.target_pose.pose.position.x = 1.0;
-  goal.target_pose.pose.orientation.w = 0.2;
+  goal.target_pose.pose.position.x = -4.0;
+  goal.target_pose.pose.position.y = 4.0;
+  goal.target_pose.pose.orientation.w = 1.0;
 
    // Send the goal position and orientation for the robot to reach
   ROS_INFO("Sending goal1");
@@ -45,15 +46,14 @@ int main(int argc, char** argv){
     ROS_INFO("Waiting for robot to pick up item at goal1");
   }
 
-//Second Goal
+  //Second Goal
 
-  // set up the frame parameters
-  //goal.target_pose.header.frame_id = "map";
-  goal.target_pose.header.stamp = ros::Time::now();
+  // goal.target_pose.header.stamp = ros::Time::now();
 
   // Define a position and orientation for the robot to reach
   goal.target_pose.pose.position.x = -1.0;
-  goal.target_pose.pose.orientation.w = 0.1;
+  goal.target_pose.pose.position.y = -3.0;
+  goal.target_pose.pose.orientation.w = 1.0;
 
    // Send the goal position and orientation for the robot to reach
   ROS_INFO("Sending goal2");
@@ -67,6 +67,11 @@ int main(int argc, char** argv){
     ROS_INFO("Hooray, the robot reached goal2");
   else
     ROS_INFO("The base failed to reach goal2 for some reason");
+  
+  // Wait 5 seconds after reaching second goal
+  while(!ac.waitForServer(ros::Duration(5.0))){
+    ROS_INFO("pick_objects_node waiting for 5 seconds before ending");
+  }
 
   return 0;
 }

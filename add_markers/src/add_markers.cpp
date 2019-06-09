@@ -30,9 +30,14 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 #include <nav_msgs/Odometry.h>
+#include <math.h>
 
-float odom_x = 0.0;
-float odom_y = 0.0;
+struct Goal
+{
+ float x;
+ float y;
+};
+Goal odom;  
 
 visualization_msgs::Marker setMarkerProperties(const uint32_t shape){
   visualization_msgs::Marker marker;
@@ -70,12 +75,19 @@ visualization_msgs::Marker setMarkerProperties(const uint32_t shape){
 
 void odom_sub_callback(const nav_msgs::Odometry::ConstPtr& message)
 {
-  odom_x = message->pose.pose.position.y;
-  odom_y = message->pose.pose.position.x;
+  odom.x = message->pose.pose.position.y;
+  odom.y = message->pose.pose.position.x;
 }
   
 int main( int argc, char** argv )
 {
+  Goal pickup,dropoff;
+  pickup.x = -4.0;
+  pickup.y = 4.0;
+  dropoff.x = -1.0;
+  dropoff.y = -3.0;
+  float pos_err_threshold = 0.2;
+  bool goal_reached = false;
   ros::init(argc, argv, "add_markers");
   ros::NodeHandle n;
   ros::Rate r(1);
@@ -88,7 +100,9 @@ int main( int argc, char** argv )
   marker = setMarkerProperties(shape);
   // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
   marker.action = visualization_msgs::Marker::ADD;
-  
+  marker.pose.position.x = pickup.x;
+  marker.pose.position.y = pickup.y;
+
   // Publish the marker
   //while (marker_pub.getNumSubscribers() < 1)
   {
@@ -102,11 +116,27 @@ int main( int argc, char** argv )
   marker_pub.publish(marker);
 
   // PC work
-  sleep(10);
+  //Check if robot reached goal
+  while(!goal_reached)
+  {
+    if(sqrt(pow(odom.x-pickup.x,2) + pow(odom.y-pickup.y,2)) < pos_err_threshold);
+       goal_reached = true;
+  }
+ 
   marker.action = visualization_msgs::Marker::DELETE;
+  marker_pub.publish(marker);
+  
+  goal_reached = false;
+  while(!goal_reached)
+  {
+    if(sqrt(pow(odom.x-dropoff.x,2) + pow(odom.y-dropoff.y,2)) < pos_err_threshold);
+       goal_reached = true;
+  }
   marker.pose.position.x = -1;
   marker.action = visualization_msgs::Marker::ADD;
-
+  marker.pose.position.x = dropoff.x;
+  marker.pose.position.y = dropoff.y;
+  
   //while (marker_pub.getNumSubscribers() < 1)
   {
     if (!ros::ok())
